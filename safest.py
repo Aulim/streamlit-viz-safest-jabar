@@ -6,14 +6,19 @@ import numpy as np
 
 st.set_page_config(page_title="Kota/Kabupaten Rawan Bencana Alam di Jawa Barat")
 st.title("Kota/Kabupaten Jawa Barat Manakah yang Paling Rawan dari Bencana Alam?")
+st.caption("Ditulis dan diolah: Auliansa Muhammad")
 
+st.markdown("""
+![](https://cdn.pixabay.com/photo/2013/02/14/15/12/new-orleans-81669_960_720.jpg?raw=true)
+""")
+st.caption("Ilustrasi bencana alam. Gambar diambil dari pixabay.com")
 st.markdown("""
 Saat ini beberapa wilayah di Indonesia sedang dilanda [cuaca yang tidak menentu dan ekstrem](https://www.bmkg.go.id/press-release/?p=bmkg-waspada-potensi-cuaca-ekstrem-masih-berlanjut-untuk-sepekan-ke-depan-09-15-oktober-2022&tag=&lang=ID). 
 Bahkan, himbauan telah diberikan [hampir satu bulan yang lalu](https://bandung.kompas.com/read/2022/09/09/121547578/cuaca-ekstrem-warga-jawa-barat-diminta-waspadai-potensi-hujan-es?page=all).
 Hingga saat ini, tercatat beberapa kabupaten dan kota di Jawa Barat telah mengalami kejadian bencana alam, seperti [banjir dan longsor di Puncak Bogor](https://jabar.antaranews.com/berita/409185/14-lokasi-wilayah-puncak-bogor-diterjang-banjir-dan-longsor) dan 
 [banjir di Bandung](https://regional.kompas.com/read/2022/10/09/093050678/semalaman-diguyur-hujan-kabupaten-bandung-kembali-terendam-banjir?page=all).
 
-Berdasarkan data kejadian-kejadian sebelumnya, daerah mana sajakah yang cenderung terkena bencana alam?
+Berdasarkan data kejadian-kejadian sebelumnya yang diperoleh dari [situs open data Jawa Barat](https://opendata.jabarprov.go.id/id/dataset), daerah mana sajakah yang cenderung terkena bencana alam?
 """)
 
 df_banjir = pd.read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vRC1OK4ZmIdRHdA9LdF4Jb3KBUFWkdLcsbcqfQT0ZdYdHjUOOR4hr06MSksyoy8PY983mLlmqQrzdLq/pub?gid=1278603687&single=true&output=csv")
@@ -67,7 +72,7 @@ with tab1:
 
 with tab2:
     bencana = st.selectbox(
-        "Pilih ranking bencana yang ingin ditampilkan:",
+        "Pilih metrik bencana yang ingin ditampilkan:",
         ['Banjir','Tanah Longsor','Gempa Bumi','Puting Beliung']
     )
 
