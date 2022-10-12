@@ -45,7 +45,7 @@ with tab1:
     plt.ylabel('Jumlah Kejadian')
     plt.ylim([0,max_bencana])
     plt.xlabel('Tahun')
-    plt.title('Bencana Alam 2012-2020')
+    plt.title(f'Bencana Alam {kotakab.title()} 2012-2021')
 
     st.pyplot(ts_bencana)
 
