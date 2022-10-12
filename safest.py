@@ -57,7 +57,6 @@ with tab1:
     plt.plot(df_tsChart['tahun'], df_tsChart['jumlah_gempa_bumi'], label='Gempa', linestyle=':')
     plt.legend(loc='best')
     plt.ylabel('Jumlah Kejadian')
-    plt.ylim([0,max_bencana])
     plt.xlabel('Tahun')
     plt.title(f'Bencana Alam {kotakab.title()} 2012-2021')
 
@@ -69,6 +68,10 @@ with tab1:
     #     y=['jumlah_banjir','jumlah_puting_beliung','jumlah_tanah_longsor','jumlah_gempa_bumi'],
     #     width=10
     # )
+
+    shown_columns = ['nama_kabupaten_kota'] + target_cols
+    with st.expander("Tabel Data"):
+        st.dataframe(df_tsChart[shown_columns].reset_index(drop=True))
 
 with tab2:
     bencana = st.selectbox(
