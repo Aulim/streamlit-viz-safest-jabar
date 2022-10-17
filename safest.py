@@ -83,7 +83,7 @@ with tab0:
         horizontal=True
     )
 
-    agg_fun = 'mean' if cls_agg == 'Rata-rata Jumlah Bencana' else 'sum'
+    agg_fun = 'mean' if cls_agg == 'Rata-rata Jumlah Bencana Tahun 2012-2021' else 'sum'
     if cls_disaster == 'Semua':
         cls_cols = target_cols
         cls_title = ''
@@ -235,7 +235,7 @@ with tab2:
     ax.yaxis.set_tick_params(pad = 10)
 
     # Add x, y gridlines
-    ax.grid(b = True, color ='grey',
+    ax.grid(visible = True, color ='grey',
             linestyle ='-.', linewidth = 0.5,
             alpha = 0.2)
     
