@@ -1,24 +1,25 @@
+from sklearn.cluster import AgglomerativeClustering
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
 
-st.set_page_config(page_title="Kota/Kabupaten Rawan Bencana Alam di Jawa Barat")
+st.set_page_config(page_title="Kota/Kabupaten Rawan Bencana Alam di Jawa Barat", layout='wide')
 st.title("Kota/Kabupaten Jawa Barat Manakah yang Paling Rawan dari Bencana Alam?")
 st.caption("Ditulis dan diolah: Auliansa Muhammad")
 
-st.markdown("""
-![](https://cdn.pixabay.com/photo/2013/02/14/15/12/new-orleans-81669_960_720.jpg?raw=true)
-""")
-st.caption("Ilustrasi bencana alam. Gambar diambil dari pixabay.com")
+# st.markdown("""
+# ![](https://cdn.pixabay.com/photo/2013/02/14/15/12/new-orleans-81669_960_720.jpg?raw=true)
+# """)
+# st.caption("Ilustrasi bencana alam. Gambar diambil dari pixabay.com")
 st.markdown("""
 Saat ini beberapa wilayah di Indonesia sedang dilanda [cuaca yang tidak menentu dan ekstrem](https://www.bmkg.go.id/press-release/?p=bmkg-waspada-potensi-cuaca-ekstrem-masih-berlanjut-untuk-sepekan-ke-depan-09-15-oktober-2022&tag=&lang=ID). 
 Bahkan, himbauan telah diberikan [hampir satu bulan yang lalu](https://bandung.kompas.com/read/2022/09/09/121547578/cuaca-ekstrem-warga-jawa-barat-diminta-waspadai-potensi-hujan-es?page=all).
 Hingga saat ini, tercatat beberapa kabupaten dan kota di Jawa Barat telah mengalami kejadian bencana alam, seperti [banjir dan longsor di Puncak Bogor](https://jabar.antaranews.com/berita/409185/14-lokasi-wilayah-puncak-bogor-diterjang-banjir-dan-longsor) dan 
 [banjir di Bandung](https://regional.kompas.com/read/2022/10/09/093050678/semalaman-diguyur-hujan-kabupaten-bandung-kembali-terendam-banjir?page=all).
 
-Berdasarkan data kejadian-kejadian sebelumnya yang diperoleh dari [situs open data Jawa Barat](https://opendata.jabarprov.go.id/id/dataset), daerah mana sajakah yang cenderung terkena bencana alam?
+Berdasarkan data kejadian-kejadian bencana tahun 2012-2021 yang diperoleh dari [situs open data Jawa Barat](https://opendata.jabarprov.go.id/id/dataset), daerah mana sajakah yang cenderung terkena bencana alam? 
 """)
 
 df_banjir = pd.read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vRC1OK4ZmIdRHdA9LdF4Jb3KBUFWkdLcsbcqfQT0ZdYdHjUOOR4hr06MSksyoy8PY983mLlmqQrzdLq/pub?gid=1278603687&single=true&output=csv")
@@ -30,53 +31,147 @@ df_bencana = pd.merge(df_banjir, df_longsor)
 df_bencana = pd.merge(df_bencana, df_gempa)
 df_bencana = pd.merge(df_bencana, df_topan)
 
-tab1, tab2 = st.tabs(['Bencana per Kota/Kabupaten Tahun 2012-2021', 'Kota/Kabupaten dengan Bencana Terbanyak'])
+target_cols = ['jumlah_banjir', 'jumlah_tanah_longsor', 'jumlah_gempa_bumi', 'jumlah_puting_beliung']
+shown_columns = ['nama_kabupaten_kota'] + target_cols
 
-with tab1:
-    kotakab = st.selectbox(
-        "Pilih kota/kabupaten yang ingin ditampilkan:",
-        df_bencana['nama_kabupaten_kota'].unique()
+def hex_to_RGB(hex_str):
+    """ #FFFFFF -> [255,255,255]"""
+    #Pass 16 to the integer function for change of base
+    return [int(hex_str[i:i+2], 16) for i in range(1,6,2)]
+
+def get_color_gradient(c1, c2, n):
+    """
+    Given two hex colors, returns a color gradient
+    with n colors.
+    """
+    assert n > 1
+    c1_rgb = np.array(hex_to_RGB(c1))/255
+    c2_rgb = np.array(hex_to_RGB(c2))/255
+    mix_pcts = [x/(n-1) for x in range(n)]
+    rgb_colors = [((1-mix)*c1_rgb + (mix*c2_rgb)) for mix in mix_pcts]
+    return ["#" + "".join([format(int(round(val*255)), "02x") for val in item]) for item in rgb_colors]
+
+def make_stacked_plot(df, target_cols, ylab, title):
+    fig, ax = plt.subplots()
+
+    x = df['nama_kabupaten_kota']
+    
+    sum = 0
+    for i in range(0, len(target_cols)):
+        ax.barh(x, df[target_cols[i]], 0.35, left=sum, label=target_cols[i])
+        sum += df[target_cols[i]]
+    ax.set_xlabel(ylab)
+    ax.set_title(title)
+    ax.legend()
+
+    return fig, ax
+
+tab0, tab1, tab2 = st.tabs(['Kelompok Kerawanan Kota/Kabupaten','Bencana per Kota/Kabupaten', 'Kota/Kabupaten dengan Bencana Terbanyak'])
+
+with tab0:
+
+    df_cls = df_bencana.copy()
+    cluster_container = st.container()
+    cls_agg = cluster_container.radio(
+        "Kelompokkan Kabupaten/Kota Berdasarkan:",
+        ['Rata-rata Jumlah Bencana Tahun 2012-2021', 'Total Jumlah Bencana Tahun 2012-2021'],
+        horizontal=True
+    )
+    cls_disaster = cluster_container.radio(
+        "Kelompokkan Berdasarkan Bencana:",
+        ['Semua', 'Banjir', 'Longsor', 'Gempa', 'Puting Beliung'],
+        horizontal=True
     )
 
-    target_cols = ['jumlah_banjir', 'jumlah_tanah_longsor', 'jumlah_gempa_bumi', 'jumlah_puting_beliung']
+    agg_fun = 'mean' if cls_agg == 'Rata-rata Jumlah Bencana' else 'sum'
+    if cls_disaster == 'Semua':
+        cls_cols = target_cols
+        cls_title = ''
+    elif cls_disaster == 'Banjir':
+        cls_cols = [target_cols[0]]
+        cls_title = cls_disaster
+    elif cls_disaster == 'Longsor':
+        cls_cols = [target_cols[1]]
+        cls_title = cls_disaster
+    elif cls_disaster == 'Gempa':
+        cls_cols = [target_cols[2]]
+        cls_title = cls_disaster
+    else:
+        cls_cols = [target_cols[3]]
+        cls_title = cls_disaster
 
-    max_banjir = df_bencana['jumlah_banjir'].max()
-    max_beliung = df_bencana['jumlah_puting_beliung'].max()
-    max_longsor = df_bencana['jumlah_tanah_longsor'].max()
-    max_gempa = df_bencana['jumlah_gempa_bumi'].max()
-    max_bencana = max([max_banjir, max_beliung, max_longsor, max_gempa])
+    df_cls = df_cls.groupby(['nama_kabupaten_kota'])[cls_cols].agg(agg_fun)
 
-    # Plot banyak bencana dari tahun ke tahun
+    AggClust = AgglomerativeClustering(n_clusters = 3).fit(df_cls)
+    y = AggClust.labels_
 
-    df_tsChart = df_bencana[df_bencana['nama_kabupaten_kota'] == kotakab]
+    df_cls_res = df_cls.reset_index()
+    df_cls_res['Cluster'] = y
 
-    ts_bencana = plt.figure()
-    plt.plot(df_tsChart['tahun'], df_tsChart['jumlah_banjir'], label='Banjir', linestyle='-')
-    plt.plot(df_tsChart['tahun'], df_tsChart['jumlah_puting_beliung'], label='Puting Beliung', linestyle='--')
-    plt.plot(df_tsChart['tahun'], df_tsChart['jumlah_tanah_longsor'], label='Longsor', linestyle='-.')
-    plt.plot(df_tsChart['tahun'], df_tsChart['jumlah_gempa_bumi'], label='Gempa', linestyle=':')
-    plt.legend(loc='best')
-    plt.ylabel('Jumlah Kejadian')
-    plt.xlabel('Tahun')
-    plt.title(f'Bencana Alam {kotakab.title()} 2012-2021')
+    df1 = df_cls_res.loc[df_cls_res['Cluster'] == 0]
+    df2 = df_cls_res.loc[df_cls_res['Cluster'] == 1]
+    df3 = df_cls_res.loc[df_cls_res['Cluster'] == 2]
 
-    st.pyplot(ts_bencana)
+    t0c1, t0c2, t0c3 = st.columns(3, gap='medium')
+    with t0c1:
+        cls_fig1, cls_ax1 = make_stacked_plot(df1, cls_cols, cls_agg, f'{cls_agg} {cls_title} Kelompok 1')
+        st.pyplot(cls_fig1)
+    with t0c2:
+        cls_fig2, cls_ax2 = make_stacked_plot(df2, cls_cols, cls_agg, f'{cls_agg} {cls_title} Kelompok 2')
+        st.pyplot(cls_fig2)
+    with t0c3:
+        cls_fig3, cls_ax3 = make_stacked_plot(df3, cls_cols, cls_agg, f'{cls_agg} {cls_title} Kelompok 3')
+        st.pyplot(cls_fig3)
 
-    # st.line_chart(
-    #     df_bencana[df_bencana['nama_kabupaten_kota'] == kotakab], 
-    #     x='tahun', 
-    #     y=['jumlah_banjir','jumlah_puting_beliung','jumlah_tanah_longsor','jumlah_gempa_bumi'],
-    #     width=10
-    # )
+with tab1:
+    t1c1, t1c2= st.columns([1.5,1], gap='medium')
 
-    shown_columns = ['nama_kabupaten_kota'] + target_cols
-    with st.expander("Tabel Data"):
-        st.dataframe(df_tsChart[shown_columns].reset_index(drop=True))
+    with t1c1:
+        # Plot banyak bencana dari tahun ke tahun
+
+        kotakab = st.selectbox(
+            "Pilih kota/kabupaten yang ingin ditampilkan:",
+            df_bencana['nama_kabupaten_kota'].unique()
+        )
+
+        df_tsChart = df_bencana[df_bencana['nama_kabupaten_kota'] == kotakab]
+
+        ts_bencana = plt.figure(figsize=(17.5,10))
+        plt.plot(df_tsChart['tahun'], df_tsChart['jumlah_banjir'], label='Banjir', linestyle='-', marker='o')
+        plt.plot(df_tsChart['tahun'], df_tsChart['jumlah_puting_beliung'], label='Puting Beliung', linestyle='--', marker='o')
+        plt.plot(df_tsChart['tahun'], df_tsChart['jumlah_tanah_longsor'], label='Longsor', linestyle='-.', marker='o')
+        plt.plot(df_tsChart['tahun'], df_tsChart['jumlah_gempa_bumi'], label='Gempa', linestyle=':', marker='o')
+        plt.legend(loc='best')
+        plt.ylabel('Jumlah Kejadian')
+        plt.xlabel('Tahun')
+        plt.title(f'Bencana Alam {kotakab.title()} 2012-2021')
+
+        st.pyplot(ts_bencana)
+
+    with t1c2:
+        start_year, end_year = st.select_slider(
+            "Pilih tahun perbandingan",
+            df_bencana['tahun'].unique(),
+            value=(2012, 2021)
+        )
+        st.write(f"Kenaikan jumlah kejadian bencana di {kotakab.title()} dari {start_year} ke {end_year}")
+        banjir_2 = int(df_tsChart.loc[df_tsChart['tahun'] == end_year, target_cols[0]].iloc[0])
+        banjir_1 = int(df_tsChart.loc[df_tsChart['tahun'] == start_year, target_cols[0]].iloc[0])
+        st.metric("Kejadian Banjir", f'{banjir_1} → {banjir_2}', banjir_2-banjir_1, delta_color='inverse')
+        longsor_2 = int(df_tsChart.loc[df_tsChart['tahun'] == end_year, target_cols[1]].iloc[0])
+        longsor_1 = int(df_tsChart.loc[df_tsChart['tahun'] == start_year, target_cols[1]].iloc[0])
+        st.metric("Kejadian Longsor", f'{longsor_1} → {longsor_2}', longsor_2-longsor_1, delta_color='inverse')
+        gempa_2 = int(df_tsChart.loc[df_tsChart['tahun'] == end_year, target_cols[2]].iloc[0])
+        gempa_1 = int(df_tsChart.loc[df_tsChart['tahun'] == start_year, target_cols[2]].iloc[0])
+        st.metric("Kejadian Gempa", f'{gempa_1} → {gempa_2}', gempa_2-gempa_1, delta_color='inverse')
+        tornado_2 = int(df_tsChart.loc[df_tsChart['tahun'] == end_year, target_cols[3]].iloc[0])
+        tornado_1 = int(df_tsChart.loc[df_tsChart['tahun'] == start_year, target_cols[3]].iloc[0])
+        st.metric("Kejadian Puting Beliung", f'{tornado_1} → {tornado_2}', tornado_2-tornado_1, delta_color='inverse')
 
 with tab2:
     bencana = st.selectbox(
         "Pilih metrik bencana yang ingin ditampilkan:",
-        ['Banjir','Tanah Longsor','Gempa Bumi','Puting Beliung']
+        ['Semua Bencana', 'Banjir','Tanah Longsor','Gempa Bumi','Puting Beliung']
     )
 
     aggregasi = st.radio(
@@ -88,7 +183,8 @@ with tab2:
     if aggregasi == "Tahunan tanpa agregasi":
         tahun = st.selectbox(
             "Pilih jangka waktu: ",
-            df_bencana['tahun'].unique()
+            df_bencana['tahun'].unique(),
+            len(df_bencana['tahun'].unique()) -1
         )
         xlab = f"Kejadian Bencana {bencana} pada Tahun {tahun}"
         df_tahun = df_bencana[df_bencana['tahun'] == tahun]
@@ -100,16 +196,13 @@ with tab2:
             df_tahun = df_bencana.groupby(['nama_kabupaten_kota']).agg("sum").reset_index()
             xlab = f"Total Kejadian Bencana {bencana} Tahun 2012-2021"
 
-
     ambil_n = st.slider(
         "Lihat berapa kota/kabupaten?",
         min_value=1,
         max_value=df_bencana['nama_kabupaten_kota'].nunique(),
-        value=3,
+        value=6,
         step=1
     )
-
-    shown_columns = ['nama_kabupaten_kota'] + target_cols
 
     if bencana == 'Banjir':
         selected_metric = 'jumlah_banjir'
@@ -117,16 +210,22 @@ with tab2:
         selected_metric = 'jumlah_tanah_longsor'
     elif bencana == 'Gempa Bumi':
         selected_metric = 'jumlah_gempa_bumi'
-    else:
+    elif bencana == 'Puting Beliung':
         selected_metric = 'jumlah_puting_beliung'
+    else:
+        selected_metric = 'total_bencana'
 
-    df_sorted = df_tahun.sort_values(by=selected_metric, ascending=False)
-    df_sorted = df_sorted[shown_columns]
+    df_temp = df_tahun.copy()
+    df_temp['total_bencana'] = df_temp['jumlah_banjir'] + df_temp['jumlah_tanah_longsor'] + df_temp['jumlah_gempa_bumi'] + df_temp['jumlah_puting_beliung']
+    df_sorted = df_temp.sort_values(by=selected_metric, ascending=False)
+    df_sorted = df_sorted[shown_columns + ['total_bencana']]
     x = df_sorted[selected_metric].head(ambil_n)
     y = df_sorted['nama_kabupaten_kota'].head(ambil_n)
 
     bar_bencana, ax = plt.subplots()
-    ax.barh(y,x)
+    bar_bencana.set_figwidth(25)
+    bar_bencana.set_figheight(10)
+    ax.barh(y, x, color = get_color_gradient("#AF0000", "#00AF00", ambil_n))
     # Remove x, y Ticks
     ax.xaxis.set_ticks_position('none')
     ax.yaxis.set_ticks_position('none')
@@ -150,9 +249,7 @@ with tab2:
                 fontsize = 10, fontweight ='bold',
                 color ='grey')
     
-    ax.set_xlabel(xlab)
+    ax.set_xlabel("Jumlah bencana")
+    ax.set_title(xlab)
 
     st.pyplot(bar_bencana)
-
-    with st.expander("Tabel Data"):
-        st.dataframe(df_sorted.head(ambil_n).reset_index(drop=True))
