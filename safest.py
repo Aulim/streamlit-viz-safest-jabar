@@ -55,8 +55,7 @@ def make_stacked_plot(df, target_cols, ylab, title):
     fig, ax = plt.subplots()
 
     x = df['nama_kabupaten_kota']
-    print(df)
-    print(x)
+    
     sum = 0
     for i in range(0, len(target_cols)):
         ax.barh(x, df[target_cols[i]], 0.35, left=sum, label=target_cols[i])
