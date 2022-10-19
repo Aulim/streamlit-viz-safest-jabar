@@ -175,40 +175,51 @@ with tab1:
         show_metric_element("Kejadian Puting Beliung", df_tsChart, target_cols[3])
 
 with tab2:
-    bencana = st.selectbox(
-        "Pilih metrik bencana yang ingin ditampilkan:",
-        ['Semua Bencana', 'Banjir','Tanah Longsor','Gempa Bumi','Puting Beliung']
-    )
-
-    aggregasi = st.radio(
-        "Pilih jenis agregasi: ",
-        ["Tahunan tanpa agregasi",'Rerata','Total'],
-        horizontal=True
-    )
-
-    if aggregasi == "Tahunan tanpa agregasi":
-        tahun = st.selectbox(
-            "Pilih jangka waktu: ",
-            df_bencana['tahun'].unique(),
-            len(df_bencana['tahun'].unique()) -1
+    t2c1, t2c2 = st.columns([1,4], gap="medium")
+    with t2c1:
+        bencana = st.selectbox(
+            "Pilih metrik bencana yang ingin ditampilkan:",
+            ['Semua Bencana', 'Banjir','Tanah Longsor','Gempa Bumi','Puting Beliung']
         )
-        xlab = f"Kejadian Bencana {bencana} pada Tahun {tahun}"
-        df_tahun = df_bencana[df_bencana['tahun'] == tahun]
-    else:
-        if aggregasi == "Rerata":
-            df_tahun = df_bencana.groupby(['nama_kabupaten_kota']).agg("mean").reset_index()
-            xlab = f"Rata-rata Kejadian Bencana {bencana} per Tahun"
-        else:
-            df_tahun = df_bencana.groupby(['nama_kabupaten_kota']).agg("sum").reset_index()
-            xlab = f"Total Kejadian Bencana {bencana} Tahun 2012-2021"
 
-    ambil_n = st.slider(
-        "Lihat berapa kota/kabupaten?",
-        min_value=1,
-        max_value=df_bencana['nama_kabupaten_kota'].nunique(),
-        value=6,
-        step=1
-    )
+        aggregasi = st.radio(
+            "Pilih jenis agregasi: ",
+            ["Tahunan tanpa agregasi",'Rerata','Total'],
+            horizontal=True
+        )
+
+        if aggregasi == "Tahunan tanpa agregasi":
+            tahun = st.selectbox(
+                "Pilih tahun: ",
+                df_bencana['tahun'].unique(),
+                len(df_bencana['tahun'].unique()) -1
+            )
+            if bencana != 'Semua Bencana':
+                xlab = f"Kejadian Bencana {bencana} Tahun {tahun}"
+            else:
+                xlab = f"Kejadian Bencana Alam Tahun {tahun}"
+            df_tahun = df_bencana[df_bencana['tahun'] == tahun]
+        else:
+            if aggregasi == "Rerata":
+                df_tahun = df_bencana.groupby(['nama_kabupaten_kota']).agg("mean").reset_index()
+                if bencana != 'Semua Bencana':
+                    xlab = f"Rata-rata Kejadian Bencana {bencana} per Tahun"
+                else:
+                    xlab = f"Rata-rata Kejadian Bencana Alam per Tahun"
+            else:
+                df_tahun = df_bencana.groupby(['nama_kabupaten_kota']).agg("sum").reset_index()
+                if bencana != 'Semua Bencana':
+                    xlab = f"Total Kejadian Bencana {bencana} Tahun 2012-2021"
+                else:
+                    xlab = f"Total Kejadian Bencana Alam Tahun 2012-2021"
+
+        ambil_n = st.slider(
+            "Lihat berapa kota/kabupaten?",
+            min_value=1,
+            max_value=df_bencana['nama_kabupaten_kota'].nunique(),
+            value=6,
+            step=1
+        )
 
     if bencana == 'Banjir':
         selected_metric = 'jumlah_banjir'
@@ -257,5 +268,5 @@ with tab2:
     
     ax.set_xlabel("Jumlah bencana")
     ax.set_title(xlab)
-
-    st.pyplot(bar_bencana)
+    with t2c2:
+        st.pyplot(bar_bencana)
