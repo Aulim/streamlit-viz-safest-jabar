@@ -66,6 +66,12 @@ def make_stacked_plot(df, target_cols, ylab, title):
 
     return fig, ax
 
+def show_metric_element(text, df, target_col):
+    value_end = int(df.loc[df['tahun'] == end_year, target_col].iloc[0])
+    value_start = int(df.loc[df['tahun'] == start_year, target_col].iloc[0])
+    delta_text = value_end-value_start if value_start == 0 else f'{round(100 * (value_end-value_start)/value_start, 2)}%'
+    st.metric(text, f'{value_start} → {value_end}', delta_text, delta_color='inverse')
+
 tab0, tab1, tab2 = st.tabs(['Kelompok Kerawanan Kota/Kabupaten','Bencana per Kota/Kabupaten', 'Kota/Kabupaten dengan Bencana Terbanyak'])
 
 with tab0:
@@ -163,18 +169,10 @@ with tab1:
             value=(2012, 2021)
         )
         st.write(f"Kenaikan jumlah kejadian bencana di {kotakab.title()} dari {start_year} ke {end_year}")
-        banjir_2 = int(df_tsChart.loc[df_tsChart['tahun'] == end_year, target_cols[0]].iloc[0])
-        banjir_1 = int(df_tsChart.loc[df_tsChart['tahun'] == start_year, target_cols[0]].iloc[0])
-        st.metric("Kejadian Banjir", f'{banjir_1} → {banjir_2}', banjir_2-banjir_1, delta_color='inverse')
-        longsor_2 = int(df_tsChart.loc[df_tsChart['tahun'] == end_year, target_cols[1]].iloc[0])
-        longsor_1 = int(df_tsChart.loc[df_tsChart['tahun'] == start_year, target_cols[1]].iloc[0])
-        st.metric("Kejadian Longsor", f'{longsor_1} → {longsor_2}', longsor_2-longsor_1, delta_color='inverse')
-        gempa_2 = int(df_tsChart.loc[df_tsChart['tahun'] == end_year, target_cols[2]].iloc[0])
-        gempa_1 = int(df_tsChart.loc[df_tsChart['tahun'] == start_year, target_cols[2]].iloc[0])
-        st.metric("Kejadian Gempa", f'{gempa_1} → {gempa_2}', gempa_2-gempa_1, delta_color='inverse')
-        tornado_2 = int(df_tsChart.loc[df_tsChart['tahun'] == end_year, target_cols[3]].iloc[0])
-        tornado_1 = int(df_tsChart.loc[df_tsChart['tahun'] == start_year, target_cols[3]].iloc[0])
-        st.metric("Kejadian Puting Beliung", f'{tornado_1} → {tornado_2}', tornado_2-tornado_1, delta_color='inverse')
+        show_metric_element("Kejadian Banjir", df_tsChart, target_cols[0])
+        show_metric_element("Kejadian Longsor", df_tsChart, target_cols[1])
+        show_metric_element("Kejadian Gempa", df_tsChart, target_cols[2])
+        show_metric_element("Kejadian Puting Beliung", df_tsChart, target_cols[3])
 
 with tab2:
     bencana = st.selectbox(
