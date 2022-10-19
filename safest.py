@@ -7,7 +7,7 @@ import numpy as np
 
 st.set_page_config(page_title="Kota/Kabupaten Rawan Bencana Alam di Jawa Barat", layout='wide')
 st.title("Kota/Kabupaten Jawa Barat Manakah yang Paling Rawan dari Bencana Alam?")
-st.caption("Ditulis dan diolah: Auliansa Muhammad")
+st.caption("Ditulis dan diolah: Auliansa Muhammad (email: aulim.id@gmail.com)")
 
 # st.markdown("""
 # ![](https://cdn.pixabay.com/photo/2013/02/14/15/12/new-orleans-81669_960_720.jpg?raw=true)
@@ -73,8 +73,8 @@ with tab0:
     df_cls = df_bencana.copy()
     cluster_container = st.container()
     cls_agg = cluster_container.radio(
-        "Kelompokkan Kabupaten/Kota Berdasarkan:",
-        ['Rata-rata Jumlah Bencana Tahun 2012-2021', 'Total Jumlah Bencana Tahun 2012-2021'],
+        "Tampilkan metrik:",
+        ['Rata-rata Jumlah Bencana', 'Total Jumlah Bencana'],
         horizontal=True
     )
     cls_disaster = cluster_container.radio(
@@ -83,7 +83,7 @@ with tab0:
         horizontal=True
     )
 
-    agg_fun = 'mean' if cls_agg == 'Rata-rata Jumlah Bencana Tahun 2012-2021' else 'sum'
+    agg_fun = 'mean' if cls_agg == 'Rata-rata Jumlah Bencana' else 'sum'
     if cls_disaster == 'Semua':
         cls_cols = target_cols
         cls_title = ''
@@ -112,15 +112,23 @@ with tab0:
     df2 = df_cls_res.loc[df_cls_res['Cluster'] == 1]
     df3 = df_cls_res.loc[df_cls_res['Cluster'] == 2]
 
+    df1 = (df1.loc[(df1[cls_cols].sum(axis=1)).sort_values(ascending=True).index,:]).reset_index()
+    df2 = (df2.loc[(df2[cls_cols].sum(axis=1)).sort_values(ascending=True).index,:]).reset_index()
+    df3 = (df3.loc[(df3[cls_cols].sum(axis=1)).sort_values(ascending=True).index,:]).reset_index()
+
+    df_cls_show = [df1, df2, df3]
+    df_cls_avgs = [(df[cls_cols].mean()).mean() for df in df_cls_show]
+    sorted_idx = np.argsort(df_cls_avgs).tolist()[::-1]
+
     t0c1, t0c2, t0c3 = st.columns(3, gap='medium')
     with t0c1:
-        cls_fig1, cls_ax1 = make_stacked_plot(df1, cls_cols, cls_agg, f'{cls_agg} {cls_title} Kelompok 1')
+        cls_fig1, _ = make_stacked_plot(df_cls_show[sorted_idx[0]], cls_cols, cls_agg, f'{cls_agg} {cls_title} Tahun 2012-2021 Kategori Rawan')
         st.pyplot(cls_fig1)
     with t0c2:
-        cls_fig2, cls_ax2 = make_stacked_plot(df2, cls_cols, cls_agg, f'{cls_agg} {cls_title} Kelompok 2')
+        cls_fig2, _ = make_stacked_plot(df_cls_show[sorted_idx[1]], cls_cols, cls_agg, f'{cls_agg} {cls_title} Tahun 2012-2021 Kategori Siaga')
         st.pyplot(cls_fig2)
     with t0c3:
-        cls_fig3, cls_ax3 = make_stacked_plot(df3, cls_cols, cls_agg, f'{cls_agg} {cls_title} Kelompok 3')
+        cls_fig3, _ = make_stacked_plot(df_cls_show[sorted_idx[2]], cls_cols, cls_agg, f'{cls_agg} {cls_title} Tahun 2012-2021 Kategori Waspada')
         st.pyplot(cls_fig3)
 
 with tab1:
