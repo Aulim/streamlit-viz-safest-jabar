@@ -7,7 +7,7 @@ import numpy as np
 
 st.set_page_config(page_title="Kota/Kabupaten Rawan Bencana Alam di Jawa Barat", layout='wide')
 st.title("Kota/Kabupaten Jawa Barat Manakah yang Paling Rawan dari Bencana Alam?")
-st.caption("Ditulis dan diolah: Auliansa Muhammad (email: aulim.id@gmail.com)")
+st.caption("Author: Auliansa Muhammad (email: aulim.id[at]gmail.com)")
 
 # st.markdown("""
 # ![](https://cdn.pixabay.com/photo/2013/02/14/15/12/new-orleans-81669_960_720.jpg?raw=true)
@@ -215,7 +215,7 @@ with tab2:
 
         ambil_n = st.slider(
             "Lihat berapa kota/kabupaten?",
-            min_value=1,
+            min_value=2,
             max_value=df_bencana['nama_kabupaten_kota'].nunique(),
             value=6,
             step=1
