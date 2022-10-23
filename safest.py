@@ -19,7 +19,7 @@ Bahkan, himbauan telah diberikan [hampir satu bulan yang lalu](https://bandung.k
 Hingga saat ini, tercatat beberapa kabupaten dan kota di Jawa Barat telah mengalami kejadian bencana alam, seperti [banjir dan longsor di Puncak Bogor](https://jabar.antaranews.com/berita/409185/14-lokasi-wilayah-puncak-bogor-diterjang-banjir-dan-longsor) dan 
 [banjir di Bandung](https://regional.kompas.com/read/2022/10/09/093050678/semalaman-diguyur-hujan-kabupaten-bandung-kembali-terendam-banjir?page=all).
 
-Berdasarkan data kejadian-kejadian bencana tahun 2012-2021 yang diperoleh dari [situs open data Jawa Barat](https://opendata.jabarprov.go.id/id/dataset), daerah mana sajakah yang cenderung terkena bencana alam? 
+Berdasarkan data kejadian-kejadian bencana tahun 2012-2021 yang diperoleh dari [situs open data Jawa Barat](https://opendata.jabarprov.go.id/id/dataset), daerah mana sajakah yang cenderung terkena bencana alam? Apakah kejadian bencana alam sepuluh tahun terakhir di Jawa Barat cenderung meningkat?
 """)
 
 df_banjir = pd.read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vRC1OK4ZmIdRHdA9LdF4Jb3KBUFWkdLcsbcqfQT0ZdYdHjUOOR4hr06MSksyoy8PY983mLlmqQrzdLq/pub?gid=1278603687&single=true&output=csv")
