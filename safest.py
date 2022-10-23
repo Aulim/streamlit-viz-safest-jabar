@@ -270,3 +270,9 @@ with tab2:
     ax.set_title(xlab)
     with t2c2:
         st.pyplot(bar_bencana)
+
+with st.expander('Sumber Data'):
+    st.write('https://opendata.jabarprov.go.id/id/dataset/jumlah-kejadian-bencana-gempa-bumi-berdasarkan-kabupatenkota-di-jawa-barat')
+    st.write('https://opendata.jabarprov.go.id/id/dataset/jumlah-kejadian-bencana-tanah-longsor-berdasarkan-kabupatenkota-di-jawa-barat')
+    st.write('https://opendata.jabarprov.go.id/id/dataset/jumlah-kejadian-bencana-banjir-berdasarkan-kabupatenkota-di-jawa-barat')
+    st.write('https://opendata.jabarprov.go.id/id/dataset/jumlah-kejadian-bencana-angin-topanangin-puting-beliung-berdasarkan-kabupatenkota-di-jawa-barat')
